@@ -1,0 +1,55 @@
+version: '3.7'
+services:
+
+  waitforsso:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - mysql
+    command: mysql:3306
+    networks:
+      mysql_network:
+        aliases:
+          - waiting-manager
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: firstapi
+    image: openjdk:15-jdk-alpine
+    environment:
+      DOCKER_DB_HOST: mysql
+    restart: always
+    ports:
+      - 80:8080
+    networks:
+      mysql_network:
+        aliases:
+          - mysql-api
+
+  mysql:
+    container_name: mysql
+    image: mysql:8.0.23
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports:
+      - 23306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: mact8628867--
+      MYSQL_DATABASE: jpa_sql_db
+      MYSQL_USER: migco
+      MYSQL_PASSWORD: mact1256--
+    volumes:
+      - ./schemas:/var/lib/mysql:rw
+    networks:
+      mysql_network:
+        aliases:
+          - mysql-host
+
+volumes:
+  vol: {}
+
+networks:
+  mysql_network:
+    name: mysql_net
+    driver: bridge
